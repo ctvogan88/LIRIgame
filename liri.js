@@ -30,7 +30,7 @@ var exit = false;
 
 var recursiveTest = function () {
     if (!exit) {
-        
+
         inquirer.prompt([
             {
                 type: 'list',
@@ -58,10 +58,31 @@ var recursiveTest = function () {
             // does the spotify thing
             else if (resp.userChoice === 'spotify-this-song') {
                 // spotify search function?
-                spotify.search({ type: 'track', query: 'All the Small Things' }, function (err, data) {
-                    if (err) {
-                        return console.log('Error occurred: ' + err);
-                    } else { console.log(data); }
+                inquirer.prompt([
+                    {
+                        name: "song",
+                        message: "What song do you want to know about?"
+                    }
+                ]).then(function (resp) {
+                    spotify
+                        .request('https://api.spotify.com/v1/tracks/"' + resp.song + '"')
+                        .then(function (data) {
+                            console.log("\n-----------------------------");
+                            console.log("Artist: " + data.artists[0].name);
+                            console.log("Song Title: " + data.name);
+                            console.log("Preview Link: " + data.external_urls.spotify);
+                            console.log("Album: " + data.album.name);
+                            console.log("-----------------------------");
+                        })
+                        .catch(function (err) {
+                            console.error('Error occurred: ' + err);
+                        });
+                    // doesn't work very well
+                    /* spotify.search({ type: 'track', query: 'All the Small Things' }, function (err, data) {
+                        if (err) {
+                            return console.log('Error occurred: ' + err);
+                        } else { console.log(data); }
+                    }); */
                 });
             }
 
@@ -72,14 +93,14 @@ var recursiveTest = function () {
                         name: "movie",
                         message: "What movie do you want to know about?"
                     }
-                ]).then( function (resp) {
+                ]).then(function (resp) {
                     request("http://www.omdbapi.com/?t=" + resp.movie + "&apikey=4d39a539", function (error, response, body) {
                         // If the request was successful...
                         if (!error && response.statusCode === 200) {
 
                             // throw the OMDb request string into an object variable and print out movie data to console
                             data = JSON.parse(body);
-                            console.log("-----------------------------");
+                            console.log("\n-----------------------------");
                             console.log("Movie Title: " + data.Title);
                             console.log("Release Year: " + data.Year);
                             console.log("IMDb Rating: " + data.imdbRating);
